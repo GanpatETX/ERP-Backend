@@ -4,8 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from .core.database import engine, AsyncSessionLocal, Base
 from app.module.testDB.model import TestUser
-app = FastAPI()
+from app.shared.auth.router import router
 
+app = FastAPI(title="ERP – ATS API", version="1.0.0")
+
+app.include_router(router, prefix="/api/v1/auth", tags=["Auth"])
 
 @app.get("/")
 def home():
@@ -21,39 +24,39 @@ def health():
     return {"status": "ok"}
 
 
-@app.on_event("startup")
-async def startup():
+# @app.on_event("startup")
+# async def startup():
 
-    # CREATE TABLES
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+#     # CREATE TABLES
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.create_all)
 
-    # INSERT TEST DATA
-    async with AsyncSessionLocal() as session:
+#     # INSERT TEST DATA
+#     async with AsyncSessionLocal() as session:
 
-        user = TestUser(
-            name="Ganpat",
-            email="ganpat@test.com"
-        )
+#         user = TestUser(
+#             name="Ganpat",
+#             email="ganpat@test.com"
+#         )
 
-        session.add(user)
+#         session.add(user)
 
-        await session.commit()
+#         await session.commit()
 
-        print("Dummy user inserted ✅")
+#         print("Dummy user inserted ✅")
 
-    # READ TEST DATA
-    async with AsyncSessionLocal() as session:
+#     # READ TEST DATA
+#     async with AsyncSessionLocal() as session:
 
-        result = await session.execute(
-            select(TestUser)
-        )
+#         result = await session.execute(
+#             select(TestUser)
+#         )
 
-        users = result.scalars().all()
+#         users = result.scalars().all()
 
-        print(users)
+#         print(users)
 
-    print("Database working perfectly ✅")
+#     print("Database working perfectly ✅")
 
 @app.get("/db-test")
 def test_db_connection(db: AsyncSession = Depends(AsyncSessionLocal)):
